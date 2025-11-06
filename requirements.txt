@@ -1,0 +1,10 @@
+flask
+tensorflow
+keras
+librosa
+numpy
+scipy
+soundfile
+pymongo
+python-dotenv
+scikit-learn

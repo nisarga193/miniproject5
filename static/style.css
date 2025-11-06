@@ -1,0 +1,7 @@
+body { font-family: Arial, sans-serif; background:#f6f8fa; color:#111; }
+.container { max-width:720px; margin:32px auto; padding:20px; background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.08);} 
+h1{margin-top:0}
+#recorder button, #recorder input { margin:6px }
+#result pre { background:#222; color:#eee; padding:12px; border-radius:6px }
+#historyList { list-style:none; padding-left:0 }
+#historyList li { padding:8px 0; border-bottom:1px solid #eee }

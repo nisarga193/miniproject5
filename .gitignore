@@ -1,0 +1,13 @@
+venv/
+.venv/
+.venv_310/
+__pycache__/
+models/
+uploads/
+data/
+detections_local.json
+.env
+*.pyc
+.DS_Store
+*.h5
+*.h5.classes.json
