@@ -1,33 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Animal Voice Detection</title>
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐾 Animal Voice Detection</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Animal Voice Detection</h1>
+  <h1>Animal Voice Detection System</h1>
+  <p>Record or upload animal sounds for detection.</p>
 
-    <div id="recorder">
-      <button id="recordBtn">Start Recording</button>
-      <button id="stopBtn" disabled>Stop</button>
-      <input id="fileInput" type="file" accept="audio/*">
-      <button id="uploadBtn">Upload</button>
-    </div>
-
-    <div id="result">
-      <h2>Prediction</h2>
-      <pre id="predText">No predictions yet.</pre>
-    </div>
-
-    <div id="history">
-      <h2>History</h2>
-      <ul id="historyList"></ul>
-    </div>
+  <div>
+    <button id="record-btn">🎙 Start Recording</button>
+    <button id="stop-btn" disabled>⏹ Stop</button>
+    <button id="upload-btn">Upload File</button>
+    <input type="file" id="upload-input" accept="audio/*" hidden />
   </div>
 
-  <script src="/app.js"></script>
+  <audio id="audio-playback" controls></audio>
+  <div id="result"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
