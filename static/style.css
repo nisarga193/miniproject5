@@ -1,7 +1,265 @@
-body { font-family: Arial, sans-serif; background:#f6f8fa; color:#111; }
-.container { max-width:720px; margin:32px auto; padding:20px; background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.08);} 
-h1{margin-top:0}
-#recorder button, #recorder input { margin:6px }
-#result pre { background:#222; color:#eee; padding:12px; border-radius:6px }
-#historyList { list-style:none; padding-left:0 }
-#historyList li { padding:8px 0; border-bottom:1px solid #eee }
+:root {
+    --primary-color: #4a6ef5;
+    --secondary-color: #6c757d;
+    --success-color: #2ecc71;
+    --error-color: #e74c3c;
+    --warning-color: #f1c40f;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --text-primary: #2d3436;
+    --text-secondary: #636e72;
+    --border-radius: 12px;
+    --transition-speed: 0.3s;
+}
+
+/* 🧱 Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* 📦 Layout */
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.app-header {
+    margin-bottom: 2rem;
+}
+
+/* 🧩 Header */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+}
+
+.title-section h1 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* 🟢 Status */
+.status-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    transition: background-color 0.3s ease;
+}
+
+.status-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* 🎴 Card Containers */
+.card {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* 🎙️ Controls */
+.record-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 110, 245, 0.25);
+}
+
+.secondary-btn {
+    background-color: #f1f3f5;
+    color: var(--text-primary);
+}
+.secondary-btn:hover {
+    background-color: #e9ecef;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 🔊 Audio Section */
+.audio-visualizer {
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.visualization-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 100px;
+    gap: 3px;
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.visualizer-bar {
+    width: 4px;
+    height: 10%;
+    background: var(--primary-color);
+    border-radius: 4px;
+    transition: height 0.05s linear;
+}
+
+/* 🎧 Audio Player */
+.audio-player {
+    width: 100%;
+    margin-top: 0.75rem;
+}
+
+/* 📊 Result Section */
+.result-container {
+    min-height: 120px;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+}
+
+.detection-result {
+    text-align: center;
+}
+
+.detection-result h3 {
+    font-size: 1.4rem;
+    color: var(--primary-color);
+}
+
+.detection-result p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+.placeholder-text {
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* 🕘 History */
+.history-container {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: transform var(--transition-speed) ease;
+}
+.history-item:hover {
+    transform: translateY(-2px);
+}
+
+.history-animal {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+.history-confidence {
+    color: var(--text-secondary);
+}
+.history-time {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+/* 🧱 Responsive Design */
+@media (max-width: 768px) {
+    .app-container {
+        padding: 1rem;
+    }
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    .record-controls {
+        flex-direction: column;
+    }
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* 🔁 Equalizer Animation (Fallback) */
+@keyframes equalize {
+    0% { height: 20%; }
+    50% { height: 80%; }
+    100% { height: 20%; }
+}
+
+.recording .visualizer-bar {
+    animation: equalize 1s ease-in-out infinite;
+    animation-delay: calc(var(--bar-index) * 0.05s);
+}

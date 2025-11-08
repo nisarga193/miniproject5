@@ -3,23 +3,221 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🐾 Animal Voice Detection</title>
+  <title>Animal Voice Detection | AI-Powered Sound Recognition</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Animal Voice Detection System</h1>
-  <p>Record or upload animal sounds for detection.</p>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <div class="logo-section">
+          <span class="material-icons logo-icon">pets</span>
+          <div class="title-section">
+            <h1>Animal Voice Detection</h1>
+            <p class="subtitle">AI-Powered Sound Recognition</p>
+          </div>
+        </div>
+        <div class="status-section" id="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-text">Initializing...</span>
+        </div>
+      </div>
+    </header>
 
-  <div>
-    <button id="record-btn">🎙 Start Recording</button>
-    <button id="stop-btn" disabled>⏹ Stop</button>
-    <button id="upload-btn">Upload File</button>
-    <input type="file" id="upload-input" accept="audio/*" hidden />
+    <main class="main-content">
+      <!-- 🎤 Recording Section -->
+      <section class="record-section card">
+        <div class="record-controls">
+          <button id="record-btn" class="btn primary-btn">
+            <span class="material-icons">mic</span> Start Recording
+          </button>
+          <button id="stop-btn" class="btn secondary-btn" disabled>
+            <span class="material-icons">stop</span> Stop
+          </button>
+          <div class="upload-container">
+            <button id="upload-btn" class="btn secondary-btn">
+              <span class="material-icons">upload_file</span> Upload Audio
+            </button>
+            <input type="file" id="upload-input" accept="audio/*" hidden />
+          </div>
+        </div>
+
+        <div class="audio-visualizer">
+          <div class="visualization-container" id="visualizer"></div>
+          <audio id="audio-playback" controls class="audio-player"></audio>
+        </div>
+      </section>
+
+      <!-- 🧠 Results -->
+      <section class="results-section card">
+        <h2>Detection Results</h2>
+        <div id="result" class="result-container">
+          <div class="placeholder-text">Record or upload an audio file to begin analysis</div>
+        </div>
+      </section>
+
+      <!-- 📜 History -->
+      <section class="history-section card">
+        <h2>Detection History</h2>
+        <div id="history-list" class="history-container"></div>
+      </section>
+    </main>
   </div>
 
-  <audio id="audio-playback" controls></audio>
-  <div id="result"></div>
+  <!-- 🎧 Enhanced JavaScript -->
+  <script>
+    const recordBtn = document.getElementById('record-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadInput = document.getElementById('upload-input');
+    const resultDiv = document.getElementById('result');
+    const audioPlayback = document.getElementById('audio-playback');
+    const visualizer = document.getElementById('visualizer');
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusText = statusIndicator.querySelector('.status-text');
+    const statusDot = statusIndicator.querySelector('.status-dot');
+    const historyList = document.getElementById('history-list');
 
-  <script src="app.js"></script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioContext, analyser, animationFrame;
+    let detectionHistory = [];
+
+    // 🎨 Setup visualization
+    function setupAudioVisualization() {
+      visualizer.innerHTML = '';
+      for (let i = 0; i < 32; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'visualizer-bar';
+        visualizer.appendChild(bar);
+      }
+    }
+
+    function updateStatus(text, color) {
+      statusText.textContent = text;
+      statusDot.style.background = color;
+    }
+
+    // 🧠 Add to history
+    function addToHistory(label, confidence) {
+      const timestamp = new Date().toLocaleTimeString();
+      detectionHistory.unshift({ label, confidence, timestamp });
+      detectionHistory = detectionHistory.slice(0, 5);
+      historyList.innerHTML = detectionHistory
+        .map(
+          (h) => `
+          <div class="history-item">
+            <span class="history-animal">${h.label}</span>
+            <span class="history-confidence">${Math.round(h.confidence * 100)}%</span>
+            <span class="history-time">${h.timestamp}</span>
+          </div>`
+        )
+        .join('');
+    }
+
+    // 🎶 Live visualizer
+    async function initializeAudioContext(stream) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+      visualizeAudio();
+    }
+
+    function visualizeAudio() {
+      const bars = visualizer.querySelectorAll('.visualizer-bar');
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      function animate() {
+        animationFrame = requestAnimationFrame(animate);
+        analyser.getByteFrequencyData(data);
+        bars.forEach((bar, i) => {
+          const value = data[i] / 255;
+          bar.style.height = `${value * 100}%`;
+          bar.style.background = `hsl(${200 + value * 100}, 80%, 60%)`;
+        });
+      }
+      animate();
+    }
+
+    // 🧩 Request mic permission
+    async function requestMicrophoneAccess() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        updateStatus('Microphone Ready 🎤', 'limegreen');
+        setupAudioVisualization();
+        recordBtn.disabled = false;
+
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          cancelAnimationFrame(animationFrame);
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          audioChunks = [];
+          const url = URL.createObjectURL(blob);
+          audioPlayback.src = url;
+          await sendAudioToServer(blob);
+        };
+
+        recordBtn.onclick = async () => {
+          await initializeAudioContext(stream);
+          mediaRecorder.start();
+          updateStatus('Recording... 🎙️', 'orange');
+          recordBtn.disabled = true;
+          stopBtn.disabled = false;
+          resultDiv.innerHTML = '<p>🎙 Recording in progress...</p>';
+        };
+
+        stopBtn.onclick = () => {
+          if (mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+            updateStatus('Processing...', 'blue');
+          }
+        };
+      } catch (err) {
+        console.error('❌ Microphone denied:', err);
+        alert('Please allow microphone access and refresh.');
+        updateStatus('Mic Access Denied ⚠️', 'red');
+      }
+    }
+
+    // 📤 Upload audio file
+    uploadBtn.onclick = () => uploadInput.click();
+    uploadInput.onchange = async () => {
+      const file = uploadInput.files[0];
+      if (file) await sendAudioToServer(file);
+    };
+
+    // 🧠 Send audio to backend
+    async function sendAudioToServer(audioFile) {
+      const formData = new FormData();
+      formData.append('file', audioFile);
+      resultDiv.innerHTML = '<p>⏳ Analyzing...</p>';
+      try {
+        const res = await fetch('/predict', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        const topLabel = data.label;
+        const confidence = Math.max(...Object.values(data.confidences));
+
+        resultDiv.innerHTML = `
+          <div class="detection-result">
+            <h3>Detected: ${topLabel}</h3>
+            <p>Confidence: ${(confidence * 100).toFixed(2)}%</p>
+          </div>`;
+        addToHistory(topLabel, confidence);
+        updateStatus('Ready ✅', 'limegreen');
+      } catch (err) {
+        resultDiv.innerHTML = `<p style="color:red;">⚠️ ${err.message}</p>`;
+        updateStatus('Error', 'red');
+      }
+    }
+
+    // 🚀 Initialize on load
+    window.addEventListener('load', requestMicrophoneAccess);
+  </script>
 </body>
 </html>

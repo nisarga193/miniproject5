@@ -5,6 +5,7 @@ librosa
 numpy
 scipy
 soundfile
+pydub
 pymongo
 python-dotenv
 scikit-learn
